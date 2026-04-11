@@ -118,6 +118,9 @@ export default function RegistroPontoScreen() {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     if (isSameDay(date, yesterday)) return 'Ontem';
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    if (isSameDay(date, tomorrow)) return 'Amanhã';
     return date.toLocaleDateString('pt-BR', {
       weekday: 'short',
       day: '2-digit',
