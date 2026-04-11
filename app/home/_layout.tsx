@@ -16,15 +16,17 @@ function TabBarIcon(props: {
 function HeaderButton(props: {
   name: React.ComponentProps<typeof FontAwesome5>['name'];
   color: string;
+  href?: string;
 }) {
+  const { href = '/modal', ...iconProps } = props;
   return (
-    <Link href="/modal" asChild>
+    <Link href={href as any} asChild>
       <Pressable>
         {({ pressed }) => (
           <FontAwesome5
             size={20}
             style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-            {...props}
+            {...iconProps}
           />
         )}
       </Pressable>
@@ -46,7 +48,7 @@ export default function TabLayout() {
         options={{
           title: 'Registro Ponto',
           tabBarIcon: ({ color }) => <TabBarIcon name="business-time" color={color} />,
-          headerRight: () => <HeaderButton name="cog" color={Colors[colorScheme ?? 'light'].text} />,
+          headerRight: () => <HeaderButton name="cog" color={Colors[colorScheme ?? 'light'].text} href="/config-ponto" />,
         }}
       />
       <Tabs.Screen

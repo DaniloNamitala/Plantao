@@ -5,6 +5,9 @@ export type ModalConfig = {
   iconColor: string;
   title: string;
   message: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  onConfirm?: () => void;
 };
 
 export type ModalState = {

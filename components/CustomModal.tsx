@@ -10,9 +10,11 @@ import {
 export default function CustomModal({ visible, isDark, config, onClose }: {
     visible: boolean;
     isDark: boolean;
-    config: { icon: string; iconColor: string; title: string; message: string };
+    config: { icon: string; iconColor: string; title: string; message: string; confirmLabel?: string; cancelLabel?: string; onConfirm?: () => void };
     onClose: () => void;
 }) {
+    const isConfirmMode = !!config.onConfirm;
+
     return (
         <Modal
             transparent
@@ -31,15 +33,40 @@ export default function CustomModal({ visible, isDark, config, onClose }: {
                     <Text style={[styles.modalMessage, isDark && styles.modalMessageDark]}>
                         {config.message}
                     </Text>
-                    <Pressable
-                        onPress={onClose}
-                        style={({ pressed }) => [
-                            styles.modalButton,
-                            pressed && styles.modalButtonPressed,
-                        ]}
-                    >
-                        <Text style={styles.modalButtonText}>OK</Text>
-                    </Pressable>
+                    {isConfirmMode ? (
+                        <View style={styles.modalButtonRow}>
+                            <Pressable
+                                onPress={onClose}
+                                style={({ pressed }) => [
+                                    styles.modalButton,
+                                    styles.modalButtonCancel,
+                                    pressed && styles.modalButtonPressed,
+                                ]}
+                            >
+                                <Text style={styles.modalButtonCancelText}>{config.cancelLabel || 'Cancelar'}</Text>
+                            </Pressable>
+                            <Pressable
+                                onPress={() => { config.onConfirm?.(); onClose(); }}
+                                style={({ pressed }) => [
+                                    styles.modalButton,
+                                    styles.modalButtonConfirm,
+                                    pressed && styles.modalButtonPressed,
+                                ]}
+                            >
+                                <Text style={styles.modalButtonText}>{config.confirmLabel || 'Confirmar'}</Text>
+                            </Pressable>
+                        </View>
+                    ) : (
+                        <Pressable
+                            onPress={onClose}
+                            style={({ pressed }) => [
+                                styles.modalButton,
+                                pressed && styles.modalButtonPressed,
+                            ]}
+                        >
+                            <Text style={styles.modalButtonText}>OK</Text>
+                        </Pressable>
+                    )}
                 </View>
             </View>
         </Modal>
@@ -113,5 +140,24 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
         fontWeight: '600',
-    }
+    },
+    modalButtonRow: {
+        flexDirection: 'row',
+        gap: 12,
+    },
+    modalButtonCancel: {
+        backgroundColor: 'transparent',
+        borderWidth: 1,
+        borderColor: '#ccc',
+        paddingHorizontal: 24,
+    },
+    modalButtonCancelText: {
+        color: '#888',
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    modalButtonConfirm: {
+        backgroundColor: '#ef4444',
+        paddingHorizontal: 24,
+    },
 })
