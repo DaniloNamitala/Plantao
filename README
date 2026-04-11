@@ -1,0 +1,139 @@
+# Financeiro — Code Architecture
+
+This project follows a three-layer architecture that separates concerns into **Data**, **Business Logic**, and **UI**. Each layer has a single, well-defined responsibility and communicates only with the layer directly adjacent to it.
+
+---
+
+## Layers Overview
+
+```
+┌─────────────────────────────────┐
+│            UI Layer             │  screens/ (TSX + hooks)
+├─────────────────────────────────┤
+│       Business Logic Layer      │  services/
+├─────────────────────────────────┤
+│          Data Layer             │  datasources/
+└─────────────────────────────────┘
+```
+
+---
+
+## 1. Data Layer — `datasources/`
+
+**Responsibility:** Raw data access. This is the only layer allowed to talk to external systems (REST APIs, local databases, AsyncStorage, device sensors, etc.).
+
+Each file inside `datasources/` is a **datasource** — a module that declares a **TypeScript interface** describing its contract and exports an implementation of that interface.
+
+### Conventions
+- One file per data source (e.g., `transactionsDatasource.ts`, `authDatasource.ts`).
+- Every datasource **must export a TypeScript interface** that defines all available operations and their signatures.
+- The concrete implementation is exported separately and satisfies that interface.
+- Functions return raw data or throw typed errors.
+- No business rules live here — only transport and serialization logic.
+- No direct imports from the UI layer.
+
+### Example
+```ts
+// datasources/transactionsDatasource.ts
+export interface TransactionsDatasource {
+  fetchTransactions(): Promise<RawTransaction[]>;
+  saveTransaction(payload: NewTransactionPayload): Promise<void>;
+}
+
+export const transactionsDatasource: TransactionsDatasource = {
+  async fetchTransactions() {
+    const response = await api.get('/transactions');
+    return response.data;
+  },
+
+  async saveTransaction(payload) {
+    await api.post('/transactions', payload);
+  },
+};
+```
+
+---
+
+## 2. Business Logic Layer — `services/`
+
+**Responsibility:** Domain rules, data transformation, validation, and orchestration. Services consume one or more datasources and expose clean, domain-oriented operations to the UI.
+
+### Conventions
+- One file per domain concept (e.g., `transactionsService.ts`, `balanceService.ts`).
+- Functions receive and return **domain models**, never raw API shapes.
+- All business rules (calculations, validations, sorting, filtering) live exclusively in this layer.
+- No UI imports; no direct API calls — always goes through a datasource.
+
+### Example
+```ts
+// services/transactionsService.ts
+import { fetchTransactions } from '../datasources/transactionsDatasource';
+
+export async function getMonthlyBalance(month: number, year: number): Promise<Balance> {
+  const raw = await fetchTransactions();
+  const filtered = raw.filter(t => matchesMonth(t.date, month, year));
+  return computeBalance(filtered);
+}
+```
+
+---
+
+## 3. UI Layer — `src/screens/`
+
+**Responsibility:** Rendering and user interaction only. Each screen is a **single `.tsx` file** that contains both the UI component and its dedicated hook. The hook and the component are co-located in the same file.
+
+### Conventions
+- The hook is defined at the top of the screen file and the component below it.
+- The hook is the bridge between the UI and the service layer; it must **never** import datasources directly.
+- The component must **never** call services directly — always through the screen's hook.
+- Side effects (API calls, navigation, alerts) go inside the hook, not the component.
+
+### Example
+```tsx
+// src/screens/Home.tsx
+import { getMonthlyBalance } from '../services/transactionsService';
+
+function useHome() {
+  const [balance, setBalance] = useState<Balance | null>(null);
+
+  useEffect(() => {
+    getMonthlyBalance(currentMonth, currentYear).then(setBalance);
+  }, []);
+
+  return { balance };
+}
+
+export function HomeScreen() {
+  const { balance } = useHome();
+  return <BalanceCard value={balance} />;
+}
+```
+
+---
+
+## Dependency Rule
+
+Dependencies flow **downward only**:
+
+```
+UI  →  Service  →  Datasource
+```
+
+No layer may import from a layer above it. This keeps business logic and data access fully testable in isolation.
+
+---
+
+## Folder Structure
+
+```
+src/
+  screens/
+    Home.tsx              # UI component + hook (co-located)
+    Transactions.tsx      # UI component + hook (co-located)
+  services/
+    transactionsService.ts
+    balanceService.ts
+  datasources/
+    transactionsDatasource.ts   # interface + implementation
+    authDatasource.ts           # interface + implementation
+```
