@@ -51,6 +51,15 @@ const pontoDataSource = {
     );
   },
 
+  async getByDateRange(startDate: string, endDate: string): Promise<Ponto[]> {
+    const database = await getDatabase();
+    return database.getAllAsync<Ponto>(
+      "SELECT * FROM ponto WHERE date >= ? AND date <= ? ORDER BY date ASC, time ASC",
+      startDate,
+      endDate
+    );
+  },
+
   async delete(id: number): Promise<void> {
     const database = await getDatabase();
     await database.runAsync("DELETE FROM ponto WHERE id = ?", id);

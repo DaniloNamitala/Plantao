@@ -62,6 +62,15 @@ const plantaoDataSource = {
     );
   },
 
+  async getByDateRange(startDate: string, endDate: string): Promise<Plantao[]> {
+    const database = await getDatabase();
+    return database.getAllAsync<Plantao>(
+      "SELECT * FROM plantao WHERE date >= ? AND date <= ? ORDER BY date ASC, start_time ASC",
+      startDate,
+      endDate
+    );
+  },
+
   async update(
     id: number,
     date: string,
