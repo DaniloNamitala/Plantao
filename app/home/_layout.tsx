@@ -18,7 +18,7 @@ function HeaderButton(props: {
   color: string;
   href?: string;
 }) {
-  const { href = '/modal', ...iconProps } = props;
+  const { href, ...iconProps } = props;
   return (
     <Link href={href as any} asChild>
       <Pressable>
@@ -52,11 +52,11 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="two"
+        name="plantao"
         options={{
           title: 'Plantão',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-          headerRight: () => <HeaderButton name="cog" color={Colors[colorScheme ?? 'light'].text} />,
+          tabBarIcon: ({ color }) => <TabBarIcon name="phone-alt" color={color} />,
+          headerRight: () => <HeaderButton name="cog" color={Colors[colorScheme ?? 'light'].text} href='/config-plantao' />,
         }}
       />
     </Tabs>

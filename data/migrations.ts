@@ -27,6 +27,36 @@ const migrations: Migration[] = [
       INSERT INTO ponto_config (work_day_duration) VALUES ('08:00');
     `,
   },
+  {
+    version: 3,
+    up: `
+      CREATE TABLE IF NOT EXISTS plantao (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        date DATE NOT NULL,
+        start_time TIME NOT NULL,
+        end_time TIME NOT NULL,
+        total_time TIME NOT NULL,
+        description TEXT
+      );
+    `,
+  },
+  {
+    version: 4,
+    up: `
+      CREATE TABLE IF NOT EXISTS sob_aviso (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        weekday INTEGER NOT NULL UNIQUE CHECK(weekday BETWEEN 0 AND 6),
+        duration TIME NOT NULL DEFAULT '00:00'
+      );
+      INSERT INTO sob_aviso (weekday, duration) VALUES (0, '00:00');
+      INSERT INTO sob_aviso (weekday, duration) VALUES (1, '00:00');
+      INSERT INTO sob_aviso (weekday, duration) VALUES (2, '00:00');
+      INSERT INTO sob_aviso (weekday, duration) VALUES (3, '00:00');
+      INSERT INTO sob_aviso (weekday, duration) VALUES (4, '00:00');
+      INSERT INTO sob_aviso (weekday, duration) VALUES (5, '00:00');
+      INSERT INTO sob_aviso (weekday, duration) VALUES (6, '00:00');
+    `,
+  },
 ];
 
 export async function runMigrations(db: SQLiteDatabase): Promise<void> {

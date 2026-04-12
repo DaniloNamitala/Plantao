@@ -49,8 +49,8 @@ function RootLayoutNav() {
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
           <Stack.Screen name="home" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-          <Stack.Screen name="config-ponto" options={{ title: 'Configurações', presentation: 'modal' }} />
+          <Stack.Screen name="config-plantao" options={{ title: 'Configurações Plantão', presentation: 'modal' }} />
+          <Stack.Screen name="config-ponto" options={{ title: 'Configurações Ponto', presentation: 'modal' }} />
         </Stack>
       </ThemeProvider>
     </GestureHandlerRootView>
